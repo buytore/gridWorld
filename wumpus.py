@@ -35,16 +35,18 @@ class PerpetualTimer(threading._Timer):
 class WumpusViewer(object):
 
     def __init__(self, environment):
+        widthX = 600 # originally 400
+        heightY = 600 # originally 400
         self.environment = environment
         root = Tk()
-        w = Canvas(root, width=400, height=400)
+        w = Canvas(root, width=widthX, height=heightY)
         self.w = w
         w.pack()
 
-        w.create_polygon(0, 0, 0, 400, 400, 400, 400, 0, fill='white')
-        for x in range(4):
-            w.create_line(100 * x, 0, 100 * x, 400)
-            w.create_line(0, 100 * x, 400, 100 * x)
+        w.create_polygon(0, 0, 0, widthX, widthX, heightY, heightY, 0, fill='white')
+        for x in range(6):
+            w.create_line(100 * x, 0, 100 * x, heightY)
+            w.create_line(0, 100 * x, widthX, 100 * x)
 
         #make holes
         for x, y in environment.holes:
@@ -105,14 +107,15 @@ class WumpusViewer(object):
 class WumpusEnvironment(RLEnvironment):
 
     def __init__(self, agent):
-        super(RLEnvironment, self).__init__([agent], (1, 1, False))
+        super(RLEnvironment, self).__init__(agent, (1, 1, False))
         self.action_dict = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
         self.wumpus = (1, 3)
         self.holes = [(3, 1), (3, 3), (4, 4)]
         self.gold = (3, 4)
         self.threats = [self.wumpus] + self.holes
 
-        self.rewards = {(1, 1, True): 10}      #positive reward after finding the gold and reset to beginning
+        # setup positive reward after finding the gold and reset to beginning of game and Maze
+        self.rewards = {(1, 1, True): 10}
 
         # setup negative rewards for holes in maze (includes Wumpus location)
         for c, r in self.threats:
@@ -127,7 +130,7 @@ class WumpusEnvironment(RLEnvironment):
         if not have_gold and (cn, rn) == self.gold:
             have_gold = True
         _next = (cn, rn, have_gold)
-        if (1 <= rn <= 4) and (1 <= cn <= 4):
+        if (1 <= rn <= 6) and (1 <= cn <= 6):
             return _next
         return state
 
@@ -158,23 +161,23 @@ if __name__ == '__main__':
             os.remove('boltzmann_utilities.txt')
 
 
-    agent = TDQLearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
+    agent1 = TDQLearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
     # ORIGINAL SETTINGS agent = TDQLearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
 
-    #agent = SARSALearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
+    agent2 = SARSALearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
 
-    game = WumpusEnvironment(agent)
+    game = WumpusEnvironment([agent1])
 
-    p = PerformanceCounter([agent], ['Q-Epsilon'])
+    # p = PerformanceCounter([agent1], ['Q-Epsilon'])
 
     print 'Training...'
 
     for i in range(5000):
         game.run()
 
-    p.show_statistics()
-    #game.run(viewer=WumpusViewer(game))
+    # p.show_statistics()
+    game.run(viewer=WumpusViewer(game))
     print "running the game after training"
-#    game.run()
+    #game.run()
 
     print "All Done - Finally"
