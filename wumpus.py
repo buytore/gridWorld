@@ -168,16 +168,16 @@ if __name__ == '__main__':
 
     agent2 = SARSALearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
 
-    game = WumpusEnvironment([agent1])
+    game = WumpusEnvironment([agent1, agent2])
 
     # p = PerformanceCounter([agent1], ['Q-Epsilon'])
 
     print 'Training...'
 
     for i in range(5000):
+        ##game.run(viewer=WumpusViewer(game))   ## Will show visual of training
         game.run()
-
-    # p.show_statistics()
+    # p.show_statistics()                       ## Produces graphical statistics about training
     game.run(viewer=WumpusViewer(game))
     print "running the game after training"
     #game.run()
