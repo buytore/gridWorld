@@ -44,7 +44,7 @@ class WumpusViewer(object):
         w.pack()
 
         w.create_polygon(0, 0, 0, widthX, widthX, heightY, heightY, 0, fill='white')
-        for x in range(6):
+        for x in range(6):                                 ## Originally range(4)
             w.create_line(100 * x, 0, 100 * x, heightY)
             w.create_line(0, 100 * x, widthX, 100 * x)
 
@@ -75,7 +75,9 @@ class WumpusViewer(object):
         root.mainloop()
 
     def _coord(self, x, y):
-        y = 5 - y
+        """Sets up main grid world coordinates based on gridEdge (this is a 7 x 7 grid world)"""
+        gridEdge = 7           # originally 5
+        y = gridEdge - y
         cx = 100 * (x - 1) + 50
         cy = 100 * (y - 1) + 50
         r = 30
@@ -107,11 +109,11 @@ class WumpusViewer(object):
 class WumpusEnvironment(RLEnvironment):
 
     def __init__(self, agent):
-        super(RLEnvironment, self).__init__(agent, (1, 1, False))
+        super(RLEnvironment, self).__init__(agent, (1, 1, False))     ## Set location of Agent
         self.action_dict = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
-        self.wumpus = (1, 3)
-        self.holes = [(3, 1), (3, 3), (4, 4)]
-        self.gold = (3, 4)
+        self.wumpus = (2, 5)
+        self.holes = [(3, 1), (3, 3), (5, 4)]
+        self.gold = (6, 5)
         self.threats = [self.wumpus] + self.holes
 
         # setup positive reward after finding the gold and reset to beginning of game and Maze
@@ -123,7 +125,7 @@ class WumpusEnvironment(RLEnvironment):
             self.rewards[(c, r, False)] = -10
 
     def do_action(self, state, action, agent):
-        c1, r1, have_gold = state
+        c1, r1, have_gold = state                   ## Breaks state tuple into components x, y, boolean
         c2, r2 = self.action_dict[action]
         rn = r1 + r2
         cn = c1 + c2
