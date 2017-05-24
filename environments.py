@@ -7,11 +7,23 @@ class Environment(object):
         self.agents = agents
         self.initial_state = initial_state
         self.state = initial_state
+        self.count = 0
 
     def run(self, steps=5000, viewer=None):
         self.state = self.initial_state
+        self.count += 1
+        """
+        if self.count == 100:
+            del self.rewards[3, 1, False]
+            del self.rewards[3, 1, True]
+            self.threats.remove((3, 1))
+            self.rewards[3, 2, False] = -10
+            self.rewards[3, 2, True] = -10
+            self.threats.append((3,2))
+        """
         for step in xrange(steps):
             if self.is_completed(self.state):
+                #print "Current State:", self.state
                 return
             self.step(viewer=viewer)
 

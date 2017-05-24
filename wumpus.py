@@ -112,12 +112,12 @@ class WumpusEnvironment(RLEnvironment):
         super(RLEnvironment, self).__init__(agent, (1, 1, False))     ## Set location of Agent
         self.action_dict = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
         self.wumpus = (2, 5)
-        self.holes = [(3, 1), (3, 3), (5, 4)]
+        self.holes = [(3, 1), (3, 3), (3, 4)]
         self.gold = (6, 5)
         self.threats = [self.wumpus] + self.holes
 
         # setup positive reward after finding the gold and reset to beginning of game and Maze
-        self.rewards = {(1, 1, True): 10}
+        self.rewards = {(6, 5, True): 10}
 
         # setup negative rewards for holes in maze (includes Wumpus location)
         for c, r in self.threats:
@@ -166,16 +166,16 @@ if __name__ == '__main__':
     agent1 = TDQLearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
     # ORIGINAL SETTINGS agent = TDQLearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
 
-    agent2 = SARSALearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
+    #agent2 = SARSALearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
 
-    game = WumpusEnvironment([agent1, agent2])
+    game = WumpusEnvironment([agent1])
 
     # p = PerformanceCounter([agent1], ['Q-Epsilon'])
 
     print 'Training...'
 
     for i in range(5000):
-        ##game.run(viewer=WumpusViewer(game))   ## Will show visual of training
+        #game.run(viewer=WumpusViewer(game))   ## Will show visual of training
         game.run()
     # p.show_statistics()                       ## Produces graphical statistics about training
     game.run(viewer=WumpusViewer(game))
