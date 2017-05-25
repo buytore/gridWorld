@@ -109,20 +109,38 @@ class WumpusViewer(object):
 class WumpusEnvironment(RLEnvironment):
 
     def __init__(self, agent):
-        super(RLEnvironment, self).__init__(agent, (1, 1, False))     ## Set location of Agent
-        self.action_dict = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
-        self.wumpus = (2, 5)
-        self.holes = [(3, 1), (3, 3), (3, 4)]
-        self.gold = (6, 5)
-        self.threats = [self.wumpus] + self.holes
+        if type(agent[0]) is SARSALearner:
+            super(RLEnvironment, self).__init__(agent, (2, 2, False))  ## Set location of Agent
+            print "Its a Sarsa Learner"
+            self.action_dict = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
+            self.wumpus = (3, 2)
+            self.holes = [(3, 1), (3, 3), (3, 4), (2, 5)]
+            self.gold = (6, 5)
+            self.threats = [self.wumpus] + self.holes
 
-        # setup positive reward after finding the gold and reset to beginning of game and Maze
-        self.rewards = {(6, 5, True): 10}
+            # setup positive reward after finding the gold and reset to beginning of game and Maze
+            self.rewards = {(6, 5, True): 10}
 
-        # setup negative rewards for holes in maze (includes Wumpus location)
-        for c, r in self.threats:
-            self.rewards[(c, r, True)] = -10
-            self.rewards[(c, r, False)] = -10
+            # setup negative rewards for holes in maze (includes Wumpus location)
+            for c, r in self.threats:
+                self.rewards[(c, r, True)] = -10
+                self.rewards[(c, r, False)] = -10
+            return
+        else:
+            super(RLEnvironment, self).__init__(agent, (1, 1, False))  ## Set location of Agent
+            self.action_dict = {'up': (0, 1), 'down': (0, -1), 'left': (-1, 0), 'right': (1, 0)}
+            self.wumpus = (3, 2)
+            self.holes = [(3, 1), (3, 3), (3, 4)]
+            self.gold = (6, 5)
+            self.threats = [self.wumpus] + self.holes
+
+            # setup positive reward after finding the gold and reset to beginning of game and Maze
+            self.rewards = {(6, 5, True): 10}
+
+            # setup negative rewards for holes in maze (includes Wumpus location)
+            for c, r in self.threats:
+                self.rewards[(c, r, True)] = -10
+                self.rewards[(c, r, False)] = -10
 
     def do_action(self, state, action, agent):
         c1, r1, have_gold = state                   ## Breaks state tuple into components x, y, boolean
@@ -178,6 +196,14 @@ if __name__ == '__main__':
         #game.run(viewer=WumpusViewer(game))   ## Will show visual of training
         game.run()
     # p.show_statistics()                       ## Produces graphical statistics about training
+
+    # TEST Concept of second routing
+    agent2 = SARSALearner(WumpusProblem(), temperature_function=make_exponential_temperature(1000, 0.01), discount_factor=0.8)
+    game2 = WumpusEnvironment([agent2])
+    for i in range(5000):
+        game2.run()
+
+
     game.run(viewer=WumpusViewer(game))
     print "running the game after training"
     #game.run()
